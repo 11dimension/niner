@@ -1,0 +1,12 @@
+# Normal
+/**/logs/
+/**/log
+
+
+# Python
+__pycache__
+*.pyc
+
+
+# Python Config
+/**/config/

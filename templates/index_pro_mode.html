@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block nav-repos %}
+<div id="navbar" class="collapse navbar-collapse">
+    <ul class="nav navbar-nav">
+        <p class="navbar-text">当前仓库</p>
+        <li class="dropdown">
+            <a id="label_repo" href="#" class="dropdown-toggle" data-toggle="dropdown">
+               {{ status_info['repo_name'] }}
+               <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+                {% for repo_name in repos %}
+                    <li><a href="/deploy/repo/{{ repo_name }}">{{ repo_name }}</a></li>
+                {% end %}
+            </ul>
+         </li>
+    </ul>
+    <a role="button" class="btn btn-default navbar-btn right" href="/deploy/logout">
+        <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+        登    出
+    </a>
+    <a role="button" class="btn btn-default navbar-btn right" href="/deploy/chpwd">
+        <span class="glyphicon glyphicon-certificate" aria-hidden="true"></span>
+        修改密码
+    </a>
+    <p class="navbar-text right">你好，{{ user.username }}</p>
+</div>
+{% end %}
+
+{% block container %}
+<div class="container">
+
+    {% comment panel of repo status %}
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 repo-status">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">仓库状态</h3>
+                    {% from utils.enums import DeployStatus %}
+                    {% if status_info['status']== DeployStatus.IDLE %}
+                    <span id="label_repo_status" class="label label-primary label_status">空闲</span>
+                    {% elif status_info['status']== DeployStatus.RUNNING %}
+                    <span id="label_repo_status" class="label label-success label_status">部署中</span>
+                    {% elif status_info['status']== DeployStatus.ROLLBACK %}
+                    <span id="label_repo_status" class="label label-danger label_status">回滚中</span>
+                    {% end %}
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <label class="col-lg-4">当前提交(COMMIT / TAG):</label>
+                        <label id="label_commit_id" class="col-lg-7">
+                            {{ status_info['last_commit'] }}
+                            {% if status_info['last_commit_tag'] %}
+                                /
+                            {{ status_info['last_commit_tag'].name }}
+                            {% end %}
+                        </label>
+                        <label id="label_commit_id_hidden" class="hidden col-lg-1">{{ status_info['last_commit'] }}</label>
+                        {% if status_info['last_commit_tag'] %}
+                            <label id="label_tag_hidden" class="hidden col-lg-1">{{ status_info['last_commit_tag'].name }}</label>
+                        {% else %}
+                            <label id="label_tag_hidden" class="hidden col-lg-1"/>
+                        {% end %}
+                    </div>
+
+                    <div class="row">
+                        <label class="col-lg-4">正在执行:</label>
+
+                        {% if status_info['task_running'] %}
+                            {% if status_info['status']== DeployStatus.RUNNING %}
+                                <label id="label_task_running" class="col-lg-8">正在部署{{ status_info['task_running'].tag }}</label>
+                            {% elif status_info['status']== DeployStatus.ROLLBACK %}
+                                <label id="label_task_running" class="col-lg-8">正在撤销部署{{ status_info['task_running'].tag }}，并回滚</label>
+                            {% end %}
+                        {% else %}
+                            <label id="label_task_running" class="col-lg-8">无</label>
+                        {% end %}
+                    </div>
+
+                    {% if status_info['task_waiting'] %}
+                    <div class="row">
+                        <label class="col-lg-4">等待队列:</label>
+                        <div class="col-lg-8">
+                            {% for one_payload in status_info['task_waiting'] %}
+                                <button class="btn btn-default btn-xs active" disabled="disabled">{{ one_payload.tag }}</button>
+                            {% end %}
+                            {% set tags_str= ','.join([one_payload.tag for one_payload in status_info['task_waiting']]) %}
+                            <label id="tags_str_hidden" class="hidden">{{ tags_str }}</label>
+                        </div>
+                    </div>
+                    {% end %}
+
+                    <div class="row">
+                        <label class="col-lg-4">自动部署:</label>
+
+                        <div class="col-lg-8">
+                            {% if status_info['auto_deploy_enable']== True %}
+                            <button id="btn_auto_deploy_enable" class="btn btn-default btn-xs active" disabled="disabled">启动</button>
+                            <button id="btn_auto_deploy_disable" class="btn btn-default btn-xs">关闭</button>
+                            {% else %}
+                            <button id="btn_auto_deploy_enable" class="btn btn-default btn-xs">启动</button>
+                            <button id="btn_auto_deploy_disable" class="btn btn-default btn-xs active" disabled="disabled">关闭</button>
+                            {% end %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <label class="col-lg-4">部署策略:</label>
+                        <label class="col-lg-8">PRO_BASE</label>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% comment panel of deploying %}
+    <div id="div_deploy_status" class="row">
+        <div class="col-lg-8 col-lg-offset-2 deploy-status">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">部署状态</h3>
+                    {% if status_info['cancel_flag']==False %}
+                    <button id="btn_rollback_immediately" class="btn btn-danger btn-xs btn-rollback" >撤销本次部署</button>
+                    {% else %}
+                    <button id="btn_rollback_immediately" class="btn btn-danger btn-xs btn-rollback" disabled="disabled">撤销本次部署</button>
+                    {% end %}
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <label class="col-lg-3">当前状态:</label>
+                        <label id="label_status_info" class="col-lg-9">{{ status_info['stage'] }}</label>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="progress">
+                                <div id="process-bar" class="progress-bar progress-bar-striped" role="progressbar"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2">
+            <div class="row">
+                {% comment panel of host list %}
+                <div class="col-lg-6 host-list">
+                    <div class="panel panel-success">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">服务器列表</h3>
+                        </div>
+                        <div class="panel-body">
+                            <ul class="list-group list-host">
+                                {% for one_host in status_info['hosts'] %}
+                                    {% set roles = status_info['hosts_roles'][one_host] %}
+                                    <li class="list-group-item" data-toggle="popover" data-placement="right" data-trigger="hover" title="服务器:{{ one_host }}" data-html="true"
+                                        data-content="角色:<br />{{ roles }}">
+                                        <label>{{ one_host }}</label>
+                                        {% from utils.enums import HostStatus %}
+                                        {% if status_info['hosts_status'][one_host]== HostStatus.NORMAL %}
+                                        <span hostname="{{ one_host }}" class="label label-primary label_status">正常</span>
+                                        {% elif status_info['hosts_status'][one_host]== HostStatus.DEPLOYING %}
+                                        <span hostname="{{ one_host }}" class="label label-info label_status">部署中</span>
+                                        {% elif status_info['hosts_status'][one_host]== HostStatus.FAULT %}
+                                        <span hostname="{{ one_host }}" class="label label-danger label_status">部署失败</span>
+                                        {% elif status_info['hosts_status'][one_host]== HostStatus.SUCCESS %}
+                                        <span hostname="{{ one_host }}" class="label label-success label_status">部署成功</span>
+                                        {% end %}
+                                    </li>
+                                {% end %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                {% comment panel of tag list %}
+                <div class="col-lg-6 tag-list">
+                    <div class="panel panel-danger">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">发布标签列表</h3>
+                            <button id="btn_rollback_tag" class="btn btn-danger btn-xs btn-rollback-tag" >回滚</button>
+                        </div>
+                        <div class="panel-body">
+                            <ul class="list-group list-tag">
+                                {% for one_tag in status_info['last_tags'] %}
+                                    <li class="list-group-item" data-toggle="popover" data-placement="left" data-trigger="hover" title="标签名:{{ one_tag.name }}" data-html="true"
+                                        data-content="作者:{{ one_tag.author }}<br />Email:{{ one_tag.email }}<br />Commit:{{ one_tag.commit_id }}<br />说明:<br />{{ one_tag.desc }}">
+                                        <span class="tag-indicator glyphicon glyphicon-menu-right" tag-name="{{ one_tag.name }}" aria-hidden="true"></span>
+                                        <label>{{ one_tag.tag_time.strftime('%Y-%m-%d %H:%M:%S') }}&nbsp;&nbsp;{{ one_tag.name }}</label>
+                                        <input type="radio" name="blankRadio" tag-name="{{ one_tag.name }}" commit-id="{{ one_tag.commit_id }}">
+                                    </li>
+                                {% end %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+</div><!-- /.container -->
+{% end %}
+
+{% block custom-js %}
+<script src="/static/deploy/js/deploy.js"></script>
+{% end %}

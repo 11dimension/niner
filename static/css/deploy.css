@@ -1,0 +1,97 @@
+/* General css */
+.right{
+  float: right;
+}
+
+/* General css of Panel */
+.panel-title{
+  display: inline-block;
+}
+
+.panel-body .row{
+  padding-left: 15px;
+  padding-bottom: 5px;
+}
+
+/* Panel of register */
+.panel-register {
+  padding-top: 150px;
+}
+
+/* Panel of change pwd */
+.panel-chpwd {
+  padding-top: 150px;
+}
+
+/* Panel of login */
+.panel-login {
+  padding-top: 150px;
+}
+
+/* Panel of Repository status */
+.repo-status {
+  padding-top: 80px;
+}
+
+.repo-status .label_status{
+  float: right;
+}
+
+
+/* Panel of Deploy Status */
+.deploy-status .btn-rollback{
+  float: right;
+}
+
+
+/* Panel of Host List */
+.host-list .list-group{
+  margin-bottom: 0px;
+}
+
+.host-list .panel-body{
+  padding: 0px;
+}
+
+.host-list .list-group-item{
+  border: 0px;
+  border-top: 1px solid #ddd
+}
+
+.host-list .label_status{
+  float: right;
+}
+
+/* Panel of Tag List */
+.tag-list .list-group{
+  margin-bottom: 0px;
+}
+
+.tag-list .panel-body{
+  padding: 0px;
+}
+
+.tag-list .list-group-item{
+  border: 0px;
+  border-top: 1px solid #ddd
+}
+
+.tag-list .list-group-item input{
+  float: right;
+}
+
+.tag-list .btn-rollback-tag{
+  float: right;
+}
+
+/* Popover */
+.popover {
+  max-width: 500px;
+  min-width: 200px;
+}
+
+
+/* Hidden */
+.hidden {
+  display: none;
+}
