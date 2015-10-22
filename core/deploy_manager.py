@@ -337,6 +337,7 @@ class GitBaseDeployManager(DeployManager):
                                          stack_info)
             try:
                 self.rollback(payload)
+                datetime_end = datetime.datetime.now()
                 mongodb_client['deployment']['deploy_log'].insert({'event_id': payload.event_id,
                                                                    'type': 'deploy_rollback',
                                                                    'result': 'success',
@@ -351,6 +352,7 @@ class GitBaseDeployManager(DeployManager):
             except Exception as rollback_ex:
                 rollback_exception_str = str(rollback_ex)
                 rollback_stack_info = traceback.format_exc()
+                datetime_end = datetime.datetime.now()
                 mongodb_client['deployment']['deploy_log'].insert({'event_id': payload.event_id,
                                                                    'type': 'deploy_rollback',
                                                                    'result': 'fail',
