@@ -7,7 +7,7 @@ from utils.decorator import retry
 
 from config import DEBUG as _DEBUG, EMAIL
 
-logger_server = logging.getLogger("DataServer.MailManager")
+logger_server = logging.getLogger("DeployServer.MailManager")
 
 success_title = "[小九来散花啦] {repo_name}部署{tag_name}成功！"
 success_text = """
