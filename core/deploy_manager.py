@@ -333,7 +333,7 @@ class GitBaseDeployManager(DeployManager):
                                                                'createdTimeStamp': int(time.time()),
                                                                'status_snapshot': serialize_status(
                                                                    self.status.export_status())})
-            mail_manager.send_error_mail(payload, self.repo.get_tag_info(payload.tag), datetime_start,
+            mail_manager.send_error_mail(payload, '', datetime_start,
                                          stack_info)
             try:
                 self.rollback(payload)
@@ -345,7 +345,7 @@ class GitBaseDeployManager(DeployManager):
                                                                    'createdTimeStamp': int(time.time()),
                                                                    'status_snapshot': serialize_status(
                                                                        self.status.export_status())})
-                mail_manager.send_rollback_success_mail(payload, self.repo.get_tag_info(payload.tag), datetime_start,
+                mail_manager.send_rollback_success_mail(payload, '', datetime_start,
                                                         datetime_end, stack_info)
 
             except Exception as rollback_ex:
@@ -361,7 +361,7 @@ class GitBaseDeployManager(DeployManager):
                                                                    'createdTimeStamp': int(time.time()),
                                                                    'status_snapshot': serialize_status(
                                                                        self.status.export_status())})
-                mail_manager.send_rollback_fail_mail(payload, self.repo.get_tag_info(payload.tag), datetime_start,
+                mail_manager.send_rollback_fail_mail(payload, '', datetime_start,
                                                         datetime_end, stack_info, rollback_stack_info)
 
     def rollback(self, payload):
