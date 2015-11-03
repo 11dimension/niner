@@ -276,12 +276,15 @@ class GitBaseDeployManager(DeployManager):
                 # Step 4.NPM & Python Package Install
                 self.stage("NPM & Python Package Install", 60)
                 repo.install_pkg(repo.get_pkg_to_install(change_files))
-                # Step 5.Get Services to restarts
+                # Step 5.Run Post-actions
+                self.stage("Run Post-actions", 70)
+                repo.handle_post_actions()
+                # Step 6.Get Services to restarts
                 self.stage("Get Services to restart", 80)
                 restart_services = repo.get_service_to_restart(change_files)
                 if _DEBUG:
                     logger_server.debug("service to restart:" + str(restart_services))
-                # Step 6.Restart Services
+                # Step 7.Restart Services
                 self.stage("Restart Services", 90)
                 repo.restart_services(restart_services, self.status.get_hosts()[0])
                 self.stage("Finish", 100)
@@ -484,43 +487,46 @@ class PackageBaseDeployManager(DeployManager):
                 # Step 4.NPM & Python Package Install
                 self.stage("NPM & Python Package Install", 40)
                 repo.install_pkg(repo.get_pkg_to_install(change_files))
-                # Step 5.Backup Deploy Directory
-                self.stage("Backup Deploy Directory", 50)
+                # Step 5.Run Post-actions
+                self.stage("Run Post-actions", 50)
+                repo.handle_post_actions()
+                # Step 6.Backup Deploy Directory
+                self.stage("Backup Deploy Directory", 60)
                 backup_tar_file = repo.backup_deploy_dir()
                 self.status.set_backup_filename(backup_tar_file)
 
                 if _DEBUG:
                     logger_server.debug("Backup File:" + backup_tar_file)
 
-                # Step 6.Tar directory
-                self.stage("Tar directory", 60)
+                # Step 7.Tar directory
+                self.stage("Tar directory", 70)
                 package_file = repo.tar_git_dir(payload.tag)
                 self.status.set_package_filename(package_file)
 
                 if _DEBUG:
                     logger_server.debug("Package File:" + package_file)
 
-                # Step 7.Release Tar
-                self.stage("Release Package", 70)
+                # Step 8.Release Tar
+                self.stage("Release Package", 80)
                 for one_host in self.status.get_hosts():
                     try:
                         self.status.set_host_status(one_host, HostStatus.DEPLOYING)
-                        # Step 7.1.SYNC package
+                        # Step 8.1.SYNC package
                         if _DEBUG:
                             logger_server.debug("Rsync files to {host}".format(host=one_host))
                         self.stage("Rsync files to {host}".format(host=one_host),
-                                   self.status.get_process_percent() + self.status.calculate_process_interval(30, 2))
+                                   self.status.get_process_percent() + self.status.calculate_process_interval(20, 2))
                         repo.release(package_file, one_host)
 
-                        # Step 7.2.Get Services to restart
+                        # Step 8.2.Get Services to restart
                         restart_services = repo.get_service_to_restart(change_files)
                         if _DEBUG:
                             logger_server.debug("service to restart:" + str(restart_services))
-                        # Step 7.3.Restart Services
+                        # Step 8.3.Restart Services
                         if _DEBUG:
                             logger_server.debug("Restart services at {host}".format(host=one_host))
                         self.stage("Restart services at {host}".format(host=one_host),
-                                   self.status.get_process_percent() + self.status.calculate_process_interval(30, 2))
+                                   self.status.get_process_percent() + self.status.calculate_process_interval(20, 2))
                         repo.restart_services(restart_services, one_host)
                         self.status.set_host_status(one_host, HostStatus.SUCCESS)
                     except RepositoryException as ex:

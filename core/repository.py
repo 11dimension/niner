@@ -50,6 +50,7 @@ class Repository():
         self.services = repo_config['SERVICES']
         self.service_pri = repo_config['SERVICES_PRI']
         self.hosts_roles = repo_config['HOSTS']
+        self.post_actions = repo_config['POST_ACTIONS']
         self.hosts = sorted(list(repo_config['HOSTS'].keys()))
 
         self._gen_service_index(repo_config)
@@ -159,6 +160,21 @@ class Repository():
             raise RepositoryException(std_content)
         else:
             return std_content
+
+    def handle_post_actions(self):
+        """Hook to handle post actions
+
+        """
+        if self.post_actions:
+            logger_server.info("Handle post actions...")
+            for one_action in self.post_actions:
+                logger_server.info("Handle post actions {action}."format(action=one_action))
+                for one_cmd in one_action.split(";")
+                    try:
+                        self._run_shell_command(one_cmd)
+                    except Exception as ex:
+                        logger_server.info("Fail to execute post action command: {cmd}".format(cmd=one_cmd))
+                        raise RepositoryException(traceback.print_exc())
 
     def cwd(self, path=None):
         """Change current work directory
