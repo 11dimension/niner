@@ -7,7 +7,7 @@ import argparse
 import os
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Deploy Server for ZQHUA.')
+    parser = argparse.ArgumentParser(description='Deploy Server.')
     parser.add_argument('-e', '--env', choices=['production', 'test', 'development'], default='test',
                         help='Environment String to decide which config file to load')
     parser.add_argument('-p', '--port', type=int, default=None, help='Port to listen')
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     else:
         listen_port = _SERVER_CFG["PORT"]
 
-    logger_server.info('Deploy Server for ZQHUA started at port: ' + str(listen_port))
+    logger_server.info('Deploy Server started at port: ' + str(listen_port))
     logger_server.info('Connected Mongodb at {ip}:{port}'.format(ip=_SERVER_CFG["MONGO_HOST"],
                                                                  port=_SERVER_CFG["MONGO_PORT"]))
 
