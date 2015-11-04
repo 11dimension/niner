@@ -9,7 +9,7 @@ URLS = [
             (r'/repo/(.*)/rollback/(.*)/(.*)', handlers.RollbackHandler),
             (r'/repo/(.*)/(.*)', handlers.OperationHandler),
             (r'/repo/(.*)', handlers.IndexHandler),
-            (r'/repo', RedirectHandler, {"url": "/deploy/repo/{repo}".format(repo=dms[0])}),
+            (r'/repo', RedirectHandler, {"url": "/deploy/repo/{repo}".format(repo=dms.keys[0])}),
             (r'/login', handlers.LoginHandler),
             (r'/logout', handlers.LogoutHandler),
             (r'/register', handlers.RegisterHandler),
