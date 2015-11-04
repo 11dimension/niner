@@ -170,7 +170,7 @@ class Repository():
             for one_action in self.post_actions:
                 logger_server.info("Handle post actions {action}".format(action=one_action))
                 try:
-                    self._run_shell_command(one_action.cmd, one_action.cwd)
+                    self._run_shell_command(one_action['cmd'], one_action['cwd'])
                 except Exception as ex:
                     logger_server.info("Fail to execute post action: {action}".format(action=one_action))
                     raise ex
