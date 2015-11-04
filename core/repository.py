@@ -147,7 +147,7 @@ class Repository():
 
         tmp_filename = '/tmp/' + str(uuid.uuid4())
         with open(tmp_filename, 'w', encoding='utf-8') as w_tmpfile:
-            return_code = subprocess.call(command, stdout=w_tmpfile, stderr=w_tmpfile)
+            return_code = subprocess.call(command, stdout=w_tmpfile, stderr=w_tmpfile, shell=True)
             if return_code > 0:
                 success = False
 
@@ -169,12 +169,11 @@ class Repository():
             logger_server.info("Handle post actions...")
             for one_action in self.post_actions:
                 logger_server.info("Handle post actions {action}".format(action=one_action))
-                for one_cmd in one_action.split(";"):
-                    try:
-                        self._run_shell_command(one_cmd)
-                    except Exception as ex:
-                        logger_server.info("Fail to execute post action command: {cmd}".format(cmd=one_cmd))
-                        raise RepositoryException(traceback.print_exc())
+                try:
+                    self._run_shell_command(one_action)
+                except Exception as ex:
+                    logger_server.info("Fail to execute post action: {action}".format(action=one_action))
+                    raise ex
 
     def cwd(self, path=None):
         """Change current work directory
