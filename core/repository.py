@@ -13,6 +13,7 @@ import datetime
 import time
 from collections import OrderedDict
 from core.tag import Tag
+import shlex
 
 logger_server = logging.getLogger("DeployServer.Repository")
 
@@ -139,11 +140,13 @@ class Repository():
         """
         success = True
 
-        command = command.split(' ')
+        # command = command.split(' ')
 
-        # remove quota pair
-        for i in range(len(command)):
-            command[i] = remove_quota_pair(command[i])
+        # # remove quota pair
+        # for i in range(len(command)):
+        #     command[i] = remove_quota_pair(command[i])
+
+        command = shlex.split(command)
 
         tmp_filename = '/tmp/' + str(uuid.uuid4())
         with open(tmp_filename, 'w', encoding='utf-8') as w_tmpfile:
