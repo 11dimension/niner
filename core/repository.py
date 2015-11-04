@@ -127,7 +127,7 @@ class Repository():
     def __hash__(self):
         return hash(self.repo_name)
 
-    def _run_shell_command(self, command):
+    def _run_shell_command(self, command, cwd=None):
         """Inner method to run a shell command
 
         Run a shell command described in param command and redirect stdout and stderr to a temp text file which
@@ -147,7 +147,7 @@ class Repository():
 
         tmp_filename = '/tmp/' + str(uuid.uuid4())
         with open(tmp_filename, 'w', encoding='utf-8') as w_tmpfile:
-            return_code = subprocess.call(command, stdout=w_tmpfile, stderr=w_tmpfile, shell=True)
+            return_code = subprocess.call(command, stdout=w_tmpfile, stderr=w_tmpfile, cwd=cwd)
             if return_code > 0:
                 success = False
 
@@ -170,7 +170,7 @@ class Repository():
             for one_action in self.post_actions:
                 logger_server.info("Handle post actions {action}".format(action=one_action))
                 try:
-                    self._run_shell_command(one_action)
+                    self._run_shell_command(one_action.cmd, one_action.cwd)
                 except Exception as ex:
                     logger_server.info("Fail to execute post action: {action}".format(action=one_action))
                     raise ex
