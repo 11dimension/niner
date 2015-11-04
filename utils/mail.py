@@ -130,6 +130,7 @@ class MailManager():
     def send_mail(self, subject, text, mail_to):
         msg = MIMEText(text, 'plain')
         msg['Subject'] = subject
+        msg['To'] = ','.join(mail_to)
         msg['From'] = self.user
 
         self._connect()
