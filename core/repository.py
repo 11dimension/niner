@@ -169,7 +169,7 @@ class Repository():
             logger_server.info("Handle post actions...")
             for one_action in self.post_actions:
                 logger_server.info("Handle post actions {action}".format(action=one_action))
-                for one_cmd in one_action.split(";")
+                for one_cmd in one_action.split(";"):
                     try:
                         self._run_shell_command(one_cmd)
                     except Exception as ex:
