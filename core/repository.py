@@ -149,8 +149,16 @@ class Repository():
         command = shlex.split(command)
 
         tmp_filename = '/tmp/' + str(uuid.uuid4())
+
+        kwargs = {
+            'args': command,
+            'stdout': w_tmpfile,
+            'stderr': w_tmpfile
+        }
+        if cwd:
+            kwargs['cwd'] = cwd
         with open(tmp_filename, 'w', encoding='utf-8') as w_tmpfile:
-            return_code = subprocess.call(command, stdout=w_tmpfile, stderr=w_tmpfile, cwd=cwd)
+            return_code = subprocess.call(**kwargs)
             if return_code > 0:
                 success = False
 
