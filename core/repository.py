@@ -252,7 +252,7 @@ class Repository():
 
         :return: pull content text
         """
-        command = "git pull --rebase origin master"
+        command = "git pull --rebase origin " + self.branch
 
         logger_server.info("Pull data from github[CMD:{cmd}]...".format(cmd=command))
 
