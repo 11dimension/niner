@@ -410,7 +410,7 @@ class Repository():
                     logger_server.info(
                         "Install node package in {file}[CMD:{cmd}]...".format(file=abs_dir + os.sep + filename,
                                                                               cmd=command))
-                    self._run_shell_command(command=command)
+                    # self._run_shell_command(command=command)
                 elif filename == "requirements.txt":
                     command = "sudo pip3 install -r {file}".format(file=self.git_path + one_file)
                     logger_server.info(
