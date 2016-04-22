@@ -412,7 +412,7 @@ class Repository():
                                                                               cmd=command))
                     # self._run_shell_command(command=command)
                 elif filename == "requirements.txt":
-                    command = "pip3 install -r {file}".format(file=self.git_path + one_file)
+                    command = "sudo pip3 install -r {file}".format(file=self.git_path + one_file)
                     logger_server.info(
                         "Install python package in {file}[CMD:{cmd}]...".format(file=self.git_path + one_file,
                                                                                 cmd=command))
