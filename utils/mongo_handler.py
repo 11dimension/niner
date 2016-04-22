@@ -12,7 +12,7 @@ logger_server = logging.getLogger("DeployServer")
 
 try:
     mongodb_client = pymongo.MongoClient(host=_SERVER_CFG["MONGO_HOST"], port=_SERVER_CFG["MONGO_PORT"])
-    # mongodb_client['admin'].authenticate(_SERVER_CFG["MONGO_USER"], _SERVER_CFG["MONGO_PWD"])
+    mongodb_client['deployment'].authenticate(_SERVER_CFG["MONGO_USERNAME"], _SERVER_CFG["MONGO_PWD"])
 except Exception as e:
     logger_server.info("MongoDB cannot connect, Please check...")
 
