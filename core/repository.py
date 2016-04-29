@@ -441,6 +441,32 @@ class Repository():
             for one_service in order_services.keys():
                 self.restart_service(one_service, host)
 
+    @retry(3)
+    def reload_service(self, service, host):
+        """Reload one service
+
+        Here service is identified as supervisor program name. For example: pyds:pyds_3355
+
+        After restart we also check service status to confirm it is really running
+
+        :param service: service name
+        :param host: hostname
+        :return:
+        """
+        if self._need_restart(host, service):
+            command = "ssh {hostname} \"supervisorctl pid {service} | xargs kill -HUP \"".format(hostname=host, service=service)
+            logger_server.info("Reload service {service} at {hostname}[CMD:{cmd}]...".format(service=service,
+                                                                                              cmd=command,
+                                                                                              hostname=host))
+            self._run_shell_command(command=command)
+
+            # sleep to restart
+            time.sleep(5)
+
+            self._check_service_running(service, host)
+        else:
+            logger_server.info("{hostname} do not need start service {service}".format(service=service,
+                                                                                       hostname=host))
 
     @retry(3)
     def restart_service(self, service, host):
