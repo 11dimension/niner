@@ -443,7 +443,7 @@ class Repository():
 
     @retry(3)
     def reload_service(self, service, host):
-        """Restart one service
+        """Reload one service
 
         Here service is identified as supervisor program name. For example: pyds:pyds_3355
 
