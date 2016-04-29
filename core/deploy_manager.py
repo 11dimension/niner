@@ -527,7 +527,7 @@ class PackageBaseDeployManager(DeployManager):
                             logger_server.debug("Restart services at {host}".format(host=one_host))
                         self.stage("Restart services at {host}".format(host=one_host),
                                    self.status.get_process_percent() + self.status.calculate_process_interval(20, 2))
-                        repo.reload_service(restart_services, one_host)
+                        repo.restart_services(restart_services, one_host)
                         self.status.set_host_status(one_host, HostStatus.SUCCESS)
                     except RepositoryException as ex:
                         self.status.set_host_status(one_host, HostStatus.FAULT)
