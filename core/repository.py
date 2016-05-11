@@ -416,7 +416,7 @@ class Repository():
                     logger_server.info(
                         "Install python package in {file}[CMD:{cmd}]...".format(file=self.git_path + one_file,
                                                                                 cmd=command))
-                    self._run_shell_command(command=command)
+                    # self._run_shell_command(command=command)
 
     def restart_services(self, services, host):
         """Restart services
