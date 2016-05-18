@@ -455,7 +455,8 @@ class Repository():
         :return:
         """
         if self._need_restart(host, service):
-            command = "ssh {hostname} \"supervisorctl pid {service} | xargs kill -HUP\"".format(hostname=host, service=service)
+            command = "supervisorctl -s {server_url} restart {service}".format(server_url="http://{hostname}:9001".format(hostname=host), service=service)
+
             logger_server.info("Restart service {service} at {hostname}[CMD:{cmd}]...".format(service=service,
                                                                                               cmd=command,
                                                                                               hostname=host))
