@@ -55,6 +55,7 @@ class Repository():
         self.hosts = sorted(list(repo_config['HOSTS'].keys()))
         self.exclude_filename = repo_config['EXCLUDE_FILENAME']
         self.pip_script = repo_config['PIP_SCRIPT']
+        self.instance_name = repo_config['INSTANCE_NAME']
 
         self._gen_service_index(repo_config)
 
