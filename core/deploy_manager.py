@@ -446,7 +446,7 @@ class GitBaseDeployManager(DeployManager):
                         logger_server.debug("Rsync files to {host}".format(host=one_host))
                     self.stage("Rsync files to {host}".format(host=one_host),
                                self.status.get_process_percent() + self.status.calculate_process_interval(20, 2))
-                    repo.rsync(self.repo.git_path[:-1],,
+                    repo.rsync(self.repo.git_path[:-1],
                                "deploy@{host}:{deploy}".format(host=one_host, deploy=self.repo.deploy_path),
                                "{git_path}{file}".format(git_path=self.repo.git_path,file=self.repo.exclude_filename) if
                                     self.repo.exclude_filename else None)
