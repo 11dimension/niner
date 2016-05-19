@@ -292,7 +292,8 @@ class GitBaseDeployManager(DeployManager):
                                    self.status.get_process_percent() + self.status.calculate_process_interval(20, 2))
                         repo.rsync(self.repo.git_path,
                                    "deploy@{host}:{deploy}".format(host=one_host, deploy=self.repo.deploy_path),
-                                   self.repo.exclude_filename)
+                                   "{git_path}/{file}".format(git_path=self.repo.git_path,file=self.repo.exclude_filename) if
+                                       self.repo.exclude_filename else None)
 
                         # Step 6.2.Get Services to restart
                         restart_services = repo.get_service_to_restart(change_files)
@@ -447,7 +448,8 @@ class GitBaseDeployManager(DeployManager):
                                self.status.get_process_percent() + self.status.calculate_process_interval(20, 2))
                     repo.rsync(self.repo.git_path,
                                "deploy@{host}:{deploy}".format(host=one_host, deploy=self.repo.deploy_path),
-                               self.repo.exclude_filename)
+                               "{git_path}/{file}".format(git_path=self.repo.git_path,file=self.repo.exclude_filename) if
+                                    self.repo.exclude_filename else None)
 
                     # Step 4.2.Restart Services
                     if _DEBUG:
