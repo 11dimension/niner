@@ -53,6 +53,7 @@ class Repository():
         self.hosts_roles = repo_config['HOSTS']
         self.post_actions = repo_config['POST_ACTIONS']
         self.hosts = sorted(list(repo_config['HOSTS'].keys()))
+        self.exclude_filename = repo_config['EXCLUDE_FILENAME']
 
         self._gen_service_index(repo_config)
 
@@ -533,6 +534,24 @@ class Repository():
 
         return target_filename
 
+    def rsync(self, src_path, dest_path, exclude_file=None):
+        """Rsync file from scr to dest
+
+        :param src_path: src path
+        :param dest_path: dest path
+        :param exclude_file: filename of exclude if exists
+        :return:
+        """
+
+        command = "rsync -a --delete {exclude} {src_path} {dest_path}".format(exclude="--exclude-from={file}".format(
+                                                                              file=exclude_file) if exclude_file else "",
+                                                                              src_path=src_path,
+                                                                              dest_path=dest_path)
+
+        logger_server.info("Rsync to deploy directory[CMD:{cmd}]....".format(cmd=command))
+        self._run_shell_command(command)
+        return
+
     def release(self, release_package, host):
         """Release release_file to deploy_path
 
@@ -551,11 +570,9 @@ class Repository():
 
         self._run_shell_command(command=command)
 
-        command = "rsync -a --delete /tmp/{repo_name} {desc}".format(repo_name=self.repo_name,
-                                                                     desc="deploy@{host}:{deploy_path}".format(
-                                                                         host=host, deploy_path=self.deploy_path))
-
-        logger_server.info("Release to deploy directory...".format(cmd=command))
+        self.rsync("/tmp/{repo_name}".format(repo_name=self.repo_name),
+                   "deploy@{host}:{deploy}".format(host=host, deploy=self.deploy_path),
+                   self.exclude_filename)
 
         self._run_shell_command(command=command)
 
