@@ -548,7 +548,7 @@ class Repository():
                                                                               src_path=src_path,
                                                                               dest_path=dest_path)
 
-        logger_server.info("Rsync to deploy directory...".format(cmd=command))
+        logger_server.info("Rsync to deploy directory[CMD:{cmd}]....".format(cmd=command))
         self._run_shell_command(command)
         return
 
