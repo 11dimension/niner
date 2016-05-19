@@ -407,7 +407,7 @@ class Repository():
             else:
                 if filename == "requirements.txt":
                     for one_host in self.hosts:
-                        command = "ssh deploy@{host} cd {project_path}; {pip} install -r {file}".format(host=one_host,
+                        command = "ssh deploy@{host} \"cd {project_path}; {pip} install -r {file}\"".format(host=one_host,
                                                                                                         project_path=self.deploy_path,
                                                                                                         pip=self.pip_script,
                                                                                                         file=one_file)
