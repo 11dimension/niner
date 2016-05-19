@@ -88,7 +88,9 @@ REPOSITORY = {
             {"cmd": "npm start", "cwd": "/home/deploy/foo"},
         ],
         # Exclude filename which contains file pattern should not rsync
-        "EXCLUDE_FILENAME": None
+        "EXCLUDE_FILENAME": None,
+        # Pip script path live in virtualenv
+        "PIP_SCRIPT": ""
     }
 }
 

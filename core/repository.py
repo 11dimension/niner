@@ -54,6 +54,7 @@ class Repository():
         self.post_actions = repo_config['POST_ACTIONS']
         self.hosts = sorted(list(repo_config['HOSTS'].keys()))
         self.exclude_filename = repo_config['EXCLUDE_FILENAME']
+        self.pip_script = repo_config['PIP_SCRIPT']
 
         self._gen_service_index(repo_config)
 
@@ -404,20 +405,15 @@ class Repository():
             if not os.path.exists(one_file):
                 logger_server.info("{file} not exist.".format(file=one_file))
             else:
-                if filename == "package.json":
-                    abs_dir = self.git_path + os.sep.join(dir_name)
-                    command = "npm install"
-                    self.cwd(abs_dir)
-                    logger_server.info(
-                        "Install node package in {file}[CMD:{cmd}]...".format(file=abs_dir + os.sep + filename,
-                                                                              cmd=command))
-                    # self._run_shell_command(command=command)
-                elif filename == "requirements.txt":
-                    command = "sudo pip3 install -r {file}".format(file=self.git_path + one_file)
-                    logger_server.info(
-                        "Install python package in {file}[CMD:{cmd}]...".format(file=self.git_path + one_file,
-                                                                                cmd=command))
-                    # self._run_shell_command(command=command)
+                if filename == "requirements.txt":
+                    for one_host in self.hosts:
+                        command = "ssh deploy@{host} \"cd {project_path}; {pip} install -r {file}\"".format(host=one_host,
+                                                                                                        project_path=self.deploy_path,
+                                                                                                        pip=self.pip_script,
+                                                                                                        file=one_file)
+                        logger_server.info("Install python package in {file}[CMD:{cmd}]...".format(file=one_file,
+                                                                                                   cmd=command))
+                        self._run_shell_command(command=command)
 
     def restart_services(self, services, host):
         """Restart services
