@@ -3,6 +3,8 @@ from utils.enums import DeployStrategy
 
 DEBUG = False
 
+INSTANCE_NAME = ''
+
 # Server primary configuration
 SERVER_CONFIG = {
     # Port of service
