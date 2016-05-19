@@ -572,7 +572,8 @@ class Repository():
 
         self.rsync("/tmp/{repo_name}".format(repo_name=self.repo_name),
                    "deploy@{host}:{deploy}".format(host=host, deploy=self.deploy_path),
-                   self.exclude_filename)
+                   "/tmp/{repo_name}/{filename}".format(repo_name=self.repo_name,
+                                                        filename=self.exclude_filename) if self.exclude_filename else None)
 
         self._run_shell_command(command=command)
 
