@@ -407,10 +407,10 @@ class Repository():
             else:
                 if filename == "requirements.txt":
                     for one_host in self.hosts:
-                        command = "ssh deploy@{host} \"cd {project_path}; {pip} install -r {file}\"".format(host=one_host,
-                                                                                                        project_path=self.deploy_path,
-                                                                                                        pip=self.pip_script,
-                                                                                                        file=one_file)
+                        command = "ssh deploy@{host} \"cd {deploy_path}; {pip} install -r {file}\"".format(host=one_host,
+                                            deploy_path="{path}/{repo}".format(path=self.deploy_path, repo=self.repo_name),
+                                                                                                    pip=self.pip_script,
+                                                                                                    file=one_file)
                         logger_server.info("Install python package in {file}[CMD:{cmd}]...".format(file=one_file,
                                                                                                    cmd=command))
                         self._run_shell_command(command=command)
