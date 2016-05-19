@@ -9,7 +9,7 @@ from config import DEBUG as _DEBUG, EMAIL
 
 logger_server = logging.getLogger("DeployServer.MailManager")
 
-success_title = "[小九来散花啦] {repo_name}部署{tag_name}成功！"
+success_title = "[{instance_name}][小九来散花啦] {repo_name}部署{tag_name}成功！"
 success_text = """
 -------------------部署相关-----------------------------
 部署者:{payload_pusher}
@@ -24,7 +24,7 @@ success_text = """
 {tag_str}
 """
 
-cancel_success_title = "[小九被调戏，自愈成功] {repo_name}部署{tag_name}时被取消，且回滚成功！"
+cancel_success_title = "[{instance_name}][小九被调戏，自愈成功] {repo_name}部署{tag_name}时被取消，且回滚成功！"
 cancel_success_text = """
 -------------------部署相关----------------------------
 部署者:{payload_pusher}
@@ -42,7 +42,7 @@ cancel_success_text = """
 {tag_str}
 """
 
-cancel_fail_title = "[小九被调戏，自愈失败，严重警告] {repo_name}部署{tag_name}时被取消，回滚失败！"
+cancel_fail_title = "[{instance_name}][[小九被调戏，自愈失败，严重警告] {repo_name}部署{tag_name}时被取消，回滚失败！"
 cancel_fail_text = """
 -------------------部署相关----------------------------
 部署者:{payload_pusher}
@@ -60,7 +60,7 @@ cancel_fail_text = """
 {tag_str}
 """
 
-error_title = "[小九遭遇意外，求关注] {repo_name}部署{tag_name}时发生错误，准备回滚！"
+error_title = "[{instance_name}][[小九遭遇意外，求关注] {repo_name}部署{tag_name}时发生错误，准备回滚！"
 error_text = """
 -------------------部署相关----------------------------
 部署者:{payload_pusher}
@@ -75,7 +75,7 @@ error_text = """
 {tag_str}
 """
 
-rollback_success_title = "[小九遭遇意外，自愈成功] {repo_name}部署{tag_name}时发生错误，回滚成功！"
+rollback_success_title = "[{instance_name}][[小九遭遇意外，自愈成功] {repo_name}部署{tag_name}时发生错误，回滚成功！"
 rollback_success_text = """
 -------------------部署相关----------------------------
 部署者:{payload_pusher}
@@ -93,7 +93,7 @@ rollback_success_text = """
 {tag_str}
 """
 
-rollback_fail_title = "[小九遭遇意外，自愈失败，严重警告] {repo_name}部署{tag_name}时发生错误，回滚失败！"
+rollback_fail_title = "[{instance_name}][[小九遭遇意外，自愈失败，严重警告] {repo_name}部署{tag_name}时发生错误，回滚失败！"
 rollback_fail_text = """
 -------------------部署相关----------------------------
 部署者:{payload_pusher}
@@ -145,9 +145,10 @@ class MailManager():
 
         return False
 
-    def send_success_mail(self, payload, tag, start_time, end_time):
+    def send_success_mail(self, instance_name, payload, tag, start_time, end_time):
         try:
-            self.send_mail(subject=success_title.format(repo_name=payload.repository_name,
+            self.send_mail(subject=success_title.format(instance_name=instance_name,
+                                                        repo_name=payload.repository_name,
                                                         tag_name=payload.tag),
                            text=success_text.format(payload_pusher=payload.username,
                                                     payload_src=payload.src,
@@ -163,7 +164,7 @@ class MailManager():
         except Exception as ex:
             logger_server.exception(ex)
 
-    def send_cancel_success_mail(self, payload, tag, start_time, end_time):
+    def send_cancel_success_mail(self, instance_name, payload, tag, start_time, end_time):
         try:
             rst = mongodb_client['deployment']['operation_log'].find_one({
                 "operation": "cancel",
@@ -173,7 +174,8 @@ class MailManager():
             cancel_username = rst['username']
             cancel_time = datetime.datetime.fromtimestamp(rst['createTimeStamp'])
 
-            self.send_mail(subject=cancel_success_title.format(repo_name=payload.repository_name,
+            self.send_mail(subject=cancel_success_title.format(instance_name=instance_name,
+                                                               repo_name=payload.repository_name,
                                                        tag_name=payload.tag),
                            text=cancel_success_text.format(payload_pusher=payload.username,
                                                    payload_src=payload.src,
@@ -191,7 +193,7 @@ class MailManager():
         except Exception as ex:
             logger_server.exception(ex)
 
-    def send_cancel_fail_mail(self, payload, tag, end_time, stack_info):
+    def send_cancel_fail_mail(self, instance_name, payload, tag, end_time, stack_info):
         try:
             rst = mongodb_client['deployment']['operation_log'].find_one({
                 "operation": "cancel",
@@ -201,7 +203,8 @@ class MailManager():
             cancel_username = rst['username']
             cancel_time = datetime.datetime.fromtimestamp(rst['createTimeStamp'])
 
-            self.send_mail(subject=cancel_fail_title.format(repo_name=payload.repository_name,
+            self.send_mail(subject=cancel_fail_title.format(instance_name=instance_name,
+                                                            repo_name=payload.repository_name,
                                                        tag_name=payload.tag),
                            text=cancel_fail_text.format(payload_pusher=payload.username,
                                                    payload_src=payload.src,
@@ -218,9 +221,10 @@ class MailManager():
         except Exception as ex:
             logger_server.exception(ex)
 
-    def send_error_mail(self, payload, tag, start_time, stack_info):
+    def send_error_mail(self, instance_name, payload, tag, start_time, stack_info):
         try:
-            self.send_mail(subject=error_title.format(repo_name=payload.repository_name,
+            self.send_mail(subject=error_title.format(instance_name=instance_name,
+                                                      repo_name=payload.repository_name,
                                                       tag_name=payload.tag),
                            text=error_text.format(payload_pusher=payload.username,
                                                   payload_src=payload.src,
@@ -235,9 +239,10 @@ class MailManager():
         except Exception as ex:
             logger_server.exception(ex)
 
-    def send_rollback_success_mail(self, payload, tag, start_time, end_time, stack_info):
+    def send_rollback_success_mail(self, instance_name, payload, tag, start_time, end_time, stack_info):
         try:
-            self.send_mail(subject=rollback_success_title.format(repo_name=payload.repository_name,
+            self.send_mail(subject=rollback_success_title.format(instance_name=instance_name,
+                                                                 repo_name=payload.repository_name,
                                                                  tag_name=payload.tag),
                            text=rollback_success_text.format(payload_pusher=payload.username,
                                                              payload_src=payload.src,
@@ -254,9 +259,10 @@ class MailManager():
         except Exception as ex:
             logger_server.exception(ex)
 
-    def send_rollback_fail_mail(self, payload, tag, start_time, end_time, stack_info, rollback_stack_info):
+    def send_rollback_fail_mail(self, instance_name, payload, tag, start_time, end_time, stack_info, rollback_stack_info):
         try:
-            self.send_mail(subject=rollback_fail_title.format(repo_name=payload.repository_name,
+            self.send_mail(subject=rollback_fail_title.format(instance_name=instance_name,
+                                                              repo_name=payload.repository_name,
                                                               tag_name=payload.tag),
                            text=rollback_fail_text.format(payload_pusher=payload.username,
                                                           payload_src=payload.src,
