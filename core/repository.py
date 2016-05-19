@@ -551,8 +551,8 @@ class Repository():
 
         self._run_shell_command(command=command)
 
-        command = "rsync -a --delete /tmp/{repo_name} {desc}".format(repo_name=self.repo_name,
-                                                                     desc="deploy@{host}:{deploy_path}".format(
+        command = "rsync -a --delete /tmp/{repo_name} {dest}".format(repo_name=self.repo_name,
+                                                                     dest="deploy@{host}:{deploy_path}".format(
                                                                          host=host, deploy_path=self.deploy_path))
 
         logger_server.info("Release to deploy directory...".format(cmd=command))
