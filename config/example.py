@@ -86,7 +86,9 @@ REPOSITORY = {
         # Command Strings to run after NPM or package install
         "POST_ACTIONS": [
             {"cmd": "npm start", "cwd": "/home/deploy/foo"},
-        ]
+        ],
+        # Exclude filename which contains file pattern should not rsync
+        "EXCLUDE_FILENAME": None
     }
 }
 

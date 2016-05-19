@@ -279,6 +279,37 @@ class GitBaseDeployManager(DeployManager):
                 # Step 5.Run Post-actions
                 self.stage("Run Post-actions", 70)
                 repo.handle_post_actions()
+
+                # Step 6.Release
+                self.stage("Release", 80)
+                for one_host in self.status.get_hosts():
+                    try:
+                        self.status.set_host_status(one_host, HostStatus.DEPLOYING)
+                        # Step 6.1.SYNC
+                        if _DEBUG:
+                            logger_server.debug("Rsync files to {host}".format(host=one_host))
+                        self.stage("Rsync files to {host}".format(host=one_host),
+                                   self.status.get_process_percent() + self.status.calculate_process_interval(20, 2))
+                        repo.rsync(self.repo.git_path,
+                                   "deploy@{host}:{deploy}".format(host=one_host, deploy=self.repo.deploy_path),
+                                   self.repo.exclude_filename)
+
+                        # Step 6.2.Get Services to restart
+                        restart_services = repo.get_service_to_restart(change_files)
+                        if _DEBUG:
+                            logger_server.debug("service to restart:" + str(restart_services))
+                        # Step 6.3.Restart Services
+                        if _DEBUG:
+                            logger_server.debug("Restart services at {host}".format(host=one_host))
+                        self.stage("Restart services at {host}".format(host=one_host),
+                                   self.status.get_process_percent() + self.status.calculate_process_interval(20, 2))
+                        repo.restart_services(restart_services, one_host)
+                        self.status.set_host_status(one_host, HostStatus.SUCCESS)
+                    except RepositoryException as ex:
+                        self.status.set_host_status(one_host, HostStatus.FAULT)
+                        raise ex
+
+                """
                 # Step 6.Get Services to restarts
                 self.stage("Get Services to restart", 80)
                 restart_services = repo.get_service_to_restart(change_files)
@@ -287,6 +318,7 @@ class GitBaseDeployManager(DeployManager):
                 # Step 7.Restart Services
                 self.stage("Restart Services", 90)
                 repo.restart_services(restart_services, self.status.get_hosts()[0])
+                """
                 self.stage("Finish", 100)
 
             else:
@@ -403,10 +435,36 @@ class GitBaseDeployManager(DeployManager):
             self.stage("Git Reset", 60)
             repo.reset(self.status.get_last_commit())
 
+            # Step 4.Release
+            self.stage("Release", 80)
+            for one_host in self.status.get_hosts():
+                try:
+                    self.status.set_host_status(one_host, HostStatus.DEPLOYING)
+                    # Step 4.1.SYNC
+                    if _DEBUG:
+                        logger_server.debug("Rsync files to {host}".format(host=one_host))
+                    self.stage("Rsync files to {host}".format(host=one_host),
+                               self.status.get_process_percent() + self.status.calculate_process_interval(20, 2))
+                    repo.rsync(self.repo.git_path,
+                               "deploy@{host}:{deploy}".format(host=one_host, deploy=self.repo.deploy_path),
+                               self.repo.exclude_filename)
+
+                    # Step 4.2.Restart Services
+                    if _DEBUG:
+                        logger_server.debug("Restart services at {host}".format(host=one_host))
+                    self.stage("Restart services at {host}".format(host=one_host),
+                               self.status.get_process_percent() + self.status.calculate_process_interval(20, 2))
+                    repo.restart_services(restart_services, one_host)
+                    self.status.set_host_status(one_host, HostStatus.SUCCESS)
+                except RepositoryException as ex:
+                    self.status.set_host_status(one_host, HostStatus.FAULT)
+                    raise ex
+
+            """
             # Step 4.Restart Services
             self.stage("Restart Services", 80)
             repo.restart_services(restart_services, self.status.get_hosts()[0])
-
+            """
             # Logging
             logger_server.info(
                 "Rollback Event[{event_id}] done.".format(event_id=event_id))
