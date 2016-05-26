@@ -6,6 +6,7 @@ from tornado.web import authenticated
 from .common_handler import CommonHandler
 import time
 from utils.mongo_handler import mongodb_client
+from config import INSTANCE_NAME as _INSTANCE_NAME
 
 logger_server = logging.getLogger("DeployServer.ChangePasswordHandler")
 
@@ -13,7 +14,7 @@ logger_server = logging.getLogger("DeployServer.ChangePasswordHandler")
 class ChangePasswordHandler(CommonHandler):
     @authenticated
     def get(self):
-        self.render("chpwd.html", msg="")
+        self.render("chpwd.html", msg="", instance_name=_INSTANCE_NAME)
 
     @authenticated
     def post(self):
@@ -21,9 +22,9 @@ class ChangePasswordHandler(CommonHandler):
         password2 = self.get_body_argument('password2', '')
 
         if not password or not password2:
-            self.render("chpwd.html", msg="请填写完整")
+            self.render("chpwd.html", msg="请填写完整", instance_name=_INSTANCE_NAME)
         elif password != password2:
-            self.render("chpwd.html", msg="两次密码输入不一致")
+            self.render("chpwd.html", msg="两次密码输入不一致", instance_name=_INSTANCE_NAME)
         else:
             m = hashlib.md5()
             m.update(password.encode("utf8"))

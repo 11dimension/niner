@@ -45,8 +45,7 @@ class DeployManagerStatus:
             'hosts_status': {},  # host状态字典{ hostname1: HostStatus, hostname2: HostStatus }
             'stage': None,  # 当前部署阶段
             'cancel_flag': False,  # 是否取消部署
-            'process_percent': 0,  # 部署进度, 整数
-            'instance_name': repo.instance_name  # 部署系统实例代号
+            'process_percent': 0  # 部署进度, 整数
         }
         self.locks = threading.RLock()
         self.init_host_status()
@@ -164,9 +163,6 @@ class DeployManagerStatus:
     def is_cancel(self):
         return self.status['cancel_flag']
 
-    def get_instance_name(self):
-        return self.status['instance_name']
-
 
 class DeployManager:
     def __init__(self, repo_name, repo_config):
@@ -213,7 +209,7 @@ class DeployManager:
                                                                    'trace': stack_info,
                                                                    'createdTimeStamp': int(time.time())})
                 if self.get_repo_strategy() == DeployStrategy.PRO_MODE:
-                    mail_manager.send_cancel_fail_mail(self.status.get_instance_name(), payload,
+                    mail_manager.send_cancel_fail_mail(payload,
                                                        self.repo.get_tag_info(payload.tag), datetime_end, stack_info)
             else:
                 raise DeployCancel()
@@ -374,8 +370,7 @@ class GitBaseDeployManager(DeployManager):
                                                                'createdTimeStamp': int(time.time()),
                                                                'status_snapshot': serialize_status(
                                                                    self.status.export_status())})
-            mail_manager.send_error_mail(self.status.get_instance_name(), payload, '', datetime_start,
-                                         stack_info)
+            mail_manager.send_error_mail(payload, '', datetime_start, stack_info)
             try:
                 self.rollback(payload)
                 datetime_end = datetime.datetime.now()
@@ -387,7 +382,7 @@ class GitBaseDeployManager(DeployManager):
                                                                    'createdTimeStamp': int(time.time()),
                                                                    'status_snapshot': serialize_status(
                                                                        self.status.export_status())})
-                mail_manager.send_rollback_success_mail(self.status.get_instance_name(), payload, '', datetime_start,
+                mail_manager.send_rollback_success_mail(payload, '', datetime_start,
                                                         datetime_end, stack_info)
 
             except Exception as rollback_ex:
@@ -404,7 +399,7 @@ class GitBaseDeployManager(DeployManager):
                                                                    'createdTimeStamp': int(time.time()),
                                                                    'status_snapshot': serialize_status(
                                                                        self.status.export_status())})
-                mail_manager.send_rollback_fail_mail(self.status.get_instance_name(), payload, '', datetime_start,
+                mail_manager.send_rollback_fail_mail(payload, '', datetime_start,
                                                         datetime_end, stack_info, rollback_stack_info)
 
     def rollback(self, payload):
@@ -614,7 +609,7 @@ class PackageBaseDeployManager(DeployManager):
                                                                'cost_time': str(datetime_end - datetime_start),
                                                                'createdTimeStamp': int(time.time())})
 
-            mail_manager.send_success_mail(self.status.get_instance_name(), payload, self.repo.get_tag_info(payload.tag), datetime_start, datetime_end)
+            mail_manager.send_success_mail(payload, self.repo.get_tag_info(payload.tag), datetime_start, datetime_end)
 
             # Check if exist waiting task to run
             self.status.lock_acquire()
@@ -643,12 +638,12 @@ class PackageBaseDeployManager(DeployManager):
                                                                'type': 'deploy_cancel',
                                                                'result': 'success',
                                                                'createdTimeStamp': int(time.time())})
-            mail_manager.send_cancel_success_mail(self.status.get_instance_name(), payload, self.repo.get_tag_info(payload.tag), datetime_start, datetime_end)
+            mail_manager.send_cancel_success_mail(payload, self.repo.get_tag_info(payload.tag), datetime_start, datetime_end)
 
         except Exception as ex:
             exception_str = str(ex)
             stack_info = traceback.format_exc()
-            mail_manager.send_error_mail(self.status.get_instance_name(), payload, self.repo.get_tag_info(payload.tag), datetime_start,
+            mail_manager.send_error_mail(payload, self.repo.get_tag_info(payload.tag), datetime_start,
                                          stack_info)
             mongodb_client['deployment']['deploy_log'].insert({'event_id': payload.event_id,
                                                                'type': 'deploy',
@@ -669,7 +664,7 @@ class PackageBaseDeployManager(DeployManager):
                                                                    'createdTimeStamp': int(time.time()),
                                                                    'status_snapshot': serialize_status(
                                                                        self.status.export_status())})
-                mail_manager.send_rollback_success_mail(self.status.get_instance_name(), payload, self.repo.get_tag_info(payload.tag), datetime_start,
+                mail_manager.send_rollback_success_mail(payload, self.repo.get_tag_info(payload.tag), datetime_start,
                                                         datetime_end, stack_info)
 
             except Exception as rollback_ex:
@@ -686,7 +681,7 @@ class PackageBaseDeployManager(DeployManager):
                                                                    'createdTimeStamp': int(time.time()),
                                                                    'status_snapshot': serialize_status(
                                                                        self.status.export_status())})
-                mail_manager.send_rollback_fail_mail(self.status.get_instance_name(), payload, self.repo.get_tag_info(payload.tag), datetime_start,
+                mail_manager.send_rollback_fail_mail(payload, self.repo.get_tag_info(payload.tag), datetime_start,
                                                         datetime_end, stack_info, rollback_stack_info)
 
 
