@@ -295,7 +295,7 @@ class GitBaseDeployManager(DeployManager):
 
                         # Step 6.2.NPM & Python Package Install
                         self.stage("NPM & Python Package Install to {host}".format(host=one_host),
-                                   self.status.get_process_percent() + self.status.calculate_process_interval(60, 3))
+                                   self.status.get_process_percent() + self.status.calculate_process_interval(30, 3))
                         repo.install_pkg(repo.get_pkg_to_install(change_files), one_host)
 
                         # Step 6.3.Get Services to restart
@@ -580,6 +580,7 @@ class PackageBaseDeployManager(DeployManager):
                         # Step 8.2.NPM & Python Package Install
                         self.stage("NPM & Python Package Install to {host}".format(host=one_host),
                                    self.status.get_process_percent() + self.status.calculate_process_interval(30, 3))
+
                         repo.install_pkg(repo.get_pkg_to_install(change_files), one_host)
 
                         # Step 8.3.Get Services to restart
@@ -590,7 +591,7 @@ class PackageBaseDeployManager(DeployManager):
                         if _DEBUG:
                             logger_server.debug("Restart services at {host}".format(host=one_host))
                         self.stage("Restart services at {host}".format(host=one_host),
-                                   self.status.get_process_percent() + self.status.calculate_process_interval(30, 2))
+                                   self.status.get_process_percent() + self.status.calculate_process_interval(30, 3))
                         repo.restart_services(restart_services, one_host)
                         self.status.set_host_status(one_host, HostStatus.SUCCESS)
                     except RepositoryException as ex:
