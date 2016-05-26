@@ -391,7 +391,7 @@ class Repository():
         return tag
 
 
-    def install_pkg(self, files):
+    def install_pkg(self, files, host):
         """Install packages depend on different package files
 
         :param files:
@@ -406,14 +406,13 @@ class Repository():
                 logger_server.info("{file} not exist.".format(file=one_file))
             else:
                 if filename == "requirements.txt":
-                    for one_host in self.hosts:
-                        command = "ssh deploy@{host} \"cd {deploy_path}; {pip} install -r {file}\"".format(host=one_host,
+                    command = "ssh deploy@{host} \"cd {deploy_path}; {pip} install -r {file}\"".format(host=host,
                                             deploy_path="{path}{repo}".format(path=self.deploy_path, repo=self.repo_name),
                                                                                                     pip=self.pip_script,
                                                                                                     file=one_file)
-                        logger_server.info("Install python package in {file}[CMD:{cmd}]...".format(file=one_file,
-                                                                                                   cmd=command))
-                        self._run_shell_command(command=command)
+                    logger_server.info("Install python package in {file}[CMD:{cmd}]...".format(file=one_file,
+                                                                                               cmd=command))
+                    self._run_shell_command(command=command)
 
     def restart_services(self, services, host):
         """Restart services
