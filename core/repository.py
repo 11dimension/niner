@@ -56,7 +56,21 @@ class Repository():
         self.exclude_filename = repo_config['EXCLUDE_FILENAME']
         self.pip_script = repo_config['PIP_SCRIPT']
 
+        self._complete_path_with_sep()
         self._gen_service_index(repo_config)
+
+    def _complete_path_with_sep(self):
+        """Add a os.sep if path in services missed
+
+        :return:
+        """
+        services = {}
+        for one_path in self.services:
+            if one_path != '*' and one_path[-1] != os.sep:
+                services[one_path + os.sep] = self.services[one_path]
+            else:
+                services[one_path] = self.services[one_path]
+        self.services = services
 
     def get_commit_tag(self, commit_id):
         """Get tag of this commit
@@ -619,23 +633,29 @@ class Repository():
         :param files: relative files to git repository path
         :return: service ids
         """
-        projects = []
         service_to_restart = []
 
         for one_file in files:
-            projcet = one_file.split('/')[0]
-            projects.append(projcet)
-
-        for one_project in set(projects):
-            if one_project in self.services:
-                services = self.services[one_project]
+            target = None
+            for one_path in self.services:
+                if one_file.startswith(one_path):
+                    if target is None or target['score'] < len(one_path):
+                        target = {'score': len(one_path), 'path': one_path}
+            if target is not None:
+                services = self.services[target['path']]
                 if type(services) == list:
                     for one_service in services:
                         service_to_restart.append(one_service)
                 elif type(services) == str:
                     service_to_restart.append(services)
-            # If any file will trigger restart this service, for flat structure of project
-            elif '*' in self.services:
-                service_to_restart.append(self.services['*'])
+            else:
+                # If any file will trigger restart this service, for flat structure of project
+                if '*' in self.services:
+                    services = self.services['*']
+                    if type(services) == list:
+                        for one_service in services:
+                            service_to_restart.append(one_service)
+                    elif type(services) == str:
+                        service_to_restart.append(services)
 
         return set(service_to_restart)
