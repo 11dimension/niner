@@ -31,6 +31,7 @@ class DeployManagerStatus:
         self.repo = repo
         self.status = {
             'repo_name': repo.repo_name,  # 仓库名称
+            'branch': repo.branch, # 分支
             'auto_deploy_enable': True,  # 是否启动自动部署
             'status': DeployStatus.IDLE,  # 当前部署状态
             'task_running': None,  # 正在执行的payload
