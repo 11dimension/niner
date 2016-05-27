@@ -43,8 +43,9 @@ EMAIL = {
 }
 
 # ! Configurations of Repos. Using list if watching more than one repos
-REPOSITORY = {
-    "repoA": {  # repo name
+REPOSITORY = [
+    {
+        "REPO_NAME": "repo_name", # repo name
         "GIT_PATH": "/home/deploy/_github/repoA/", # path where repo resides in, needed in both production/test mode
         "DEPLOY_PATH": "/home/deploy/_online/", # path where deploy to, needed in production mode
         "PACKAGE_PATH": "/home/deploy/_package/", # path where packages save to, need in production mode
@@ -94,7 +95,7 @@ REPOSITORY = {
         # Pip script path live in virtualenv
         "PIP_SCRIPT": ""
     }
-}
+]
 
 LOGGING = {
     "version": 1,
