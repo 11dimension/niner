@@ -791,7 +791,47 @@ class DeployManagerFactory():
             return PackageBaseDeployManager(repo_name, repo_config)
 
 
-dms = {}
+class DeployManagerCenter():
+    def __init__(self, repository_config):
+        self.dms = {}
 
-for repo_name, repo_config in _REPOSITORY_CFG.items():
-    dms[repo_name] = DeployManagerFactory.create_deploy_manager(repo_name, repo_config)
+        for repo_config in repository_config:
+            repo_name = repo_config['REPO_NAME']
+            if repo_name not in self.dms:
+                self.dms[repo_name] = {}
+            self.dms[repo_name][repo_config['BRANCH']] = DeployManagerFactory.create_deploy_manager(repo_name, repo_config)
+
+    def need_handle_payload(self, payload):
+        repo_name = payload.repository_name
+
+        if repo_name not in self.dms:
+            return False
+        else:
+            if payload.is_branch:
+                for branch, dm in self.dms[repo_name].items():
+                    if payload.branch == branch:
+                        return True
+                return False
+            elif payload.is_tag:
+                return True
+
+    def get_dm_by_payload(self, payload):
+        repo_name = payload.repository_name
+
+        if payload.is_branch:
+            for branch, dm in self.dms[repo_name].items():
+                if payload.branch == branch:
+                    return dm
+        elif payload.is_tag:
+            return list(self.dms[repo_name].values())[0]
+
+    def list_repos_with_branch(self):
+        repos_with_branch = []
+        for repo_name, branch_dms in self.dms.items():
+            for branch, dm in branch_dms.items():
+                repos_with_branch.append('{repo_name}/{branch}'.format(repo_name=repo_name, branch=branch))
+        return repos_with_branch
+
+
+dmc = DeployManagerCenter(_REPOSITORY_CFG)
+

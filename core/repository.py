@@ -142,7 +142,7 @@ class Repository():
             return False
 
     def __hash__(self):
-        return hash(self.repo_name)
+        return hash(self.repo_name + self.branch)
 
     def _run_shell_command(self, command, cwd=None):
         """Inner method to run a shell command

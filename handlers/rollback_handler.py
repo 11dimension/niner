@@ -3,7 +3,7 @@ __author__ = 'magus0219'
 import logging
 from tornado.web import authenticated
 from .common_handler import CommonHandler
-from core.deploy_manager import dms
+from core.deploy_manager import dmc
 from core.payload import PayLoad
 import threading
 import time
@@ -14,14 +14,15 @@ logger_server = logging.getLogger("DeployServer.RollbackHandler")
 
 class RollbackHandler(CommonHandler):
     @authenticated
-    def put(self, repo_name, commit_id, tag):
-        if repo_name in dms:
-            dm = dms[repo_name]
+    def put(self, repo_name, branch, commit_id, tag):
+        if repo_name in dmc and branch in dmc[repo_name]:
+            dm = dmc[repo_name][branch]
             payload = PayLoad.create_by_rollback(commit_id, tag, repo_name, self.get_current_user().username)
 
             mongodb_client['deployment']['webhook'].insert({'event': 'rollback',
                                                             "event_id": payload.event_id,
                                                             "repoName": repo_name,
+                                                            "branch": branch,
                                                             'payload': vars(payload),
                                                             'createTimeStamp': int(time.time())})
             t = threading.Thread(target=dm.handle_event,

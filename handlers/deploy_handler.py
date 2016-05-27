@@ -3,7 +3,7 @@ __author__ = 'magus0219'
 import logging
 from config import DEBUG as _DEBUG, GITHUB as _GITHUB_CFG
 from .common_handler import CommonHandler
-from core.deploy_manager import dms
+from core.deploy_manager import dmc
 from core.payload import PayLoad
 import threading
 import json
@@ -48,13 +48,13 @@ class DeployHandler(CommonHandler):
             repo_name = payload.repository_name
             if _DEBUG == True:
                 logger_server.debug("Repo Name:{repo_name}".format(repo_name=repo_name))
-            if payload and repo_name in dms:
+            if payload and dmc.need_handle_payload(payload):
                 # Logging to db
                 mongodb_client['deployment']['webhook'].insert({'event': self.event,
                                                                 'signature': self.signature,
                                                                 'delivery_uuid': self.delivery_uuid,
                                                                 'payload': self.payload})
-                t = threading.Thread(target=dms[repo_name].handle_event,
+                t = threading.Thread(target=dmc.get_dm_by_payload(payload).handle_event,
                                      args=(self.delivery_uuid, self.event, payload))
                 t.start()
 

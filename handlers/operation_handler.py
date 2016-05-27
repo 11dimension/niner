@@ -3,7 +3,7 @@ __author__ = 'magus0219'
 import logging
 from tornado.web import authenticated
 from .common_handler import CommonHandler
-from core.deploy_manager import dms
+from core.deploy_manager import dmc
 from utils.mongo_handler import mongodb_client, serialize_status
 import json
 import time
@@ -13,9 +13,9 @@ logger_server = logging.getLogger("DeployServer.OperationHandler")
 
 class OperationHandler(CommonHandler):
     @authenticated
-    def put(self, repo_name, operation):
-        if repo_name in dms:
-            dm = dms[repo_name]
+    def put(self, repo_name, branch, operation):
+        if repo_name in dmc and branch in dmc[repo_name]:
+            dm = dmc[repo_name][branch]
             if operation == 'cancel':
                 dm.status.lock_acquire()
                 dm.status.set_cancel_flag(True)
@@ -26,6 +26,7 @@ class OperationHandler(CommonHandler):
                     "userId": self.get_current_user().user_id,
                     "username": self.get_current_user().username,
                     "repoName": repo_name,
+                    "branch": branch,
                     "operation": operation,
                     "statusSnapshot": serialize_status(dm.get_status_info()),
                     "createTimeStamp": int(time.time())
@@ -48,14 +49,15 @@ class OperationHandler(CommonHandler):
                     "userId": self.get_current_user().user_id,
                     "username": self.get_current_user().username,
                     "repoName": repo_name,
+                    "branch": branch,
                     "operation": operation,
                     "createTimeStamp": int(time.time())
                 })
 
     @authenticated
-    def get(self, repo_name, operation):
-        if repo_name in dms:
-            dm = dms[repo_name]
+    def get(self, repo_name, branch, operation):
+        if repo_name in dmc and branch in dmc[repo_name]:
+            dm = dmc[repo_name][branch]
             if operation == 'status':
                 status = dm.get_status_info()
 
