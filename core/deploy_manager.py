@@ -832,6 +832,11 @@ class DeployManagerCenter():
                 repos_with_branch.append('{repo_name}/{branch}'.format(repo_name=repo_name, branch=branch))
         return repos_with_branch
 
+    def __contains__(self, item):
+        return item in self.dms
+
+    def __getitem__(self, item):
+        return self.dms[item]
 
 dmc = DeployManagerCenter(_REPOSITORY_CFG)
 
